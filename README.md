@@ -4,6 +4,17 @@ Este projeto é um assistente de IA (chatbot) que utiliza RAG (Retrieval-Augment
 
 Construído com Python, LangChain e Streamlit, e totalmente containerizado com Docker para deploy na Google Cloud Run.
 
+## Screenshots
+
+Aqui está uma demonstração do assistente em ação:
+
+**Interface de Chat (Streamlit):**
+![Interface de Chat do Assistente de IA](tela%20inicial.png)
+
+**Exemplo de Resposta (Baseada em RAG):**
+![Exemplo de Resposta do Assistente de IA](pergunta.png)
+
+
 ## Como Funciona
 
 A aplicação segue uma arquitetura RAG clássica:
