@@ -1,0 +1,15 @@
+.venv/
+
+# Arquivos de Segredos
+.streamlit/secrets.toml
+secrets.toml
+*.env
+
+# Arquivos de Dados Sigilosos
+*.pdf
+.dockerignore
+.doc
+rag_core_bkp.py
+app_deepseek.py
+# Caches do Python
+__pycache__/
