@@ -1,4 +1,5 @@
 steps:
+# 1. CONSTRUIR (Build)
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'build',
@@ -22,12 +23,16 @@ steps:
     '--image=us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo-procon/procon-bot:$SHORT_SHA',
     '--region=us-central1',
     '--platform=managed',
-    '--quiet'  # O --quiet é importante para rodar sem perguntas (Y/n)
+    '--quiet'
   ]
 
 # Lista a imagem final para o Artifact Registry
 images:
 - 'us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo-procon/procon-bot:$SHORT_SHA'
 
-# Aumenta o tempo limite (bom para instalações Python demoradas)
+# Aumenta o timeout
 timeout: 1600s
+
+#Para armazenar os LOGs
+options:
+  logging: CLOUD_LOGGING_ONLY
