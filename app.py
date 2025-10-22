@@ -13,7 +13,7 @@ from langchain_chroma import Chroma
 st.set_page_config(page_title="PROCON Digital", page_icon="⚖️", layout="centered")
 
 st.title("⚖️ PROCON Digital - Assistente Virtual")
-st.markdown("Tire suas dúvidas sobre o Código de Defesa do Consumidor e outras leis relacionadas.")
+st.markdown("Tire suas dúvidas sobre o Código de Defesa do Consumidor")
 
 
 # --- 2. Função de Cache para Carregar o Backend (RAG Chain) ---
@@ -76,12 +76,20 @@ def load_rag_chain():
 
         # 4. Criar Embeddings e Vector Store (ChromaDB)
         embedding_mistral = MistralAIEmbeddings()
-        store_vetor = Chroma.from_documents(
-            documents=chunks,
-            embedding=embedding_mistral,
-            collection_name='procon_lei_mistral_st',  # Nome de coleção
+        persist_directory = 'db'
+        #Trecho abaixo foi usado apenas para gerar o bd
+        # store_vetor = Chroma.from_documents(
+        #     documents=chunks,
+        #     embedding=embedding_mistral,
+        #     persist_directory=persist_directory,
+        #     collection_name='ProconVDC',  # Nome de coleção
+        # )
+        vector_store = Chroma(
+            persist_directory=persist_directory,
+            collection_name='ProconVDC',
+            embedding_function=embedding_mistral,
         )
-        retriever = store_vetor.as_retriever()
+        retriever = vector_store.as_retriever()
 
         # 5. Montar a RAG Chain
         prompt = hub.pull('rlm/rag-prompt')

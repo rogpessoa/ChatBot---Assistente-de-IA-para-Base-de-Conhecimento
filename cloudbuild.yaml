@@ -1,0 +1,33 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'build',
+    '-t',
+    'us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo-procon/procon-bot:$SHORT_SHA',
+    '.'
+  ]
+
+# 2. ENVIAR (Push)
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'push',
+    'us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo-procon/procon-bot:$SHORT_SHA'
+  ]
+
+# 3. IMPLANTAR (Deploy)
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args: [
+    'run', 'deploy', 'procon-app-service',
+    '--image=us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo-procon/procon-bot:$SHORT_SHA',
+    '--region=us-central1',
+    '--platform=managed',
+    '--quiet'  # O --quiet é importante para rodar sem perguntas (Y/n)
+  ]
+
+# Lista a imagem final para o Artifact Registry
+images:
+- 'us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo-procon/procon-bot:$SHORT_SHA'
+
+# Aumenta o tempo limite (bom para instalações Python demoradas)
+timeout: 1600s
