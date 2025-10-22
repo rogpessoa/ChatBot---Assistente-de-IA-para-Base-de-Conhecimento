@@ -110,10 +110,54 @@ Este projeto está configurado para ser construído e executado em um container 
 
 ### Deploy na Google Cloud Run
 
-Este repositório está pronto para deploy no Cloud Run. O processo de alto nível é:
+Os passos para o deploy usando Cloud Run/Cloudbuild
+1. Criar um arquivo cloudbuild.yaml com as configurações;
+2. Habilitar as APIs do CloudBuild e IAM
 
-1.  **Habilitar APIs:** `gcloud services enable run.googleapis.com`, `artifactregistry.googleapis.com`, `secretmanager.googleapis.com`.
-2.  **Guardar Segredos:** Salvar seu `secrets.toml` no Google Secret Manager.
-3.  **Criar Repositório:** Criar um repositório no Artifact Registry (`gcloud artifacts repositories create ...`).
-4.  **Enviar Imagem:** Taguear e enviar sua imagem Docker (`docker tag ...` & `docker push ...`).
-5.  **Fazer Deploy:** Usar o comando `gcloud run deploy ...` para iniciar o serviço, conectando os segredos do Secret Manager e apontando para a imagem no Artifact Registry.
+```bash
+    gcloud services enable cloudbuild.googleapis.com
+    gcloud services enable iam.googleapis.com   
+
+```
+3. Define seu projectID (será necessário para usar na autenticação do cloudbuild)
+```bash
+  export PROJECT_ID=$(gcloud config get-value project)
+```
+4. Encontra o número do projeto onde está vinculado o cloudrun
+```bash
+    export PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
+```
+5. Cria email do serviço do cloudbuild que será usado na autenticação
+```bash
+    export CLOUDBUILD_SA="${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com"
+```
+6. Permissão para implantar no CloudRun
+```bash
+  gcloud projects add-iam-policy-binding $PROJECT_ID \
+      --member="serviceAccount:$CLOUDBUILD_SA" \
+      --role="roles/run.admin"
+```
+6. Permissão para enviar a imagem Docker
+```bash
+    gcloud projects add-iam-policy-binding $PROJECT_ID \
+        --member="serviceAccount:$CLOUDBUILD_SA" \
+        --role="roles/artifactregistry.writer"
+```
+7. Agora precisamos criar uma permissão para Cloud Build "agir como um Robô" do cloud run
+```bash
+  export RUN_SA=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")-compute@developer.gserviceaccount.com
+  gcloud iam service-accounts add-iam-policy-binding $RUN_SA \
+    --member="serviceAccount:$CLOUDBUILD_SA" \
+    --role="roles/iam.serviceAccountUser"
+```
+8. Criar um arquivo cloudbuild.yaml (no repositorio tem)
+9. No console do GCP ir em Cloud Build, procurar por gatilhos (triggers) e conectar no repositório
+10. Ainda no painel do gatilho, é necessário configurar o deploy deixando por padrão envio por push ou ramificação e clicar em criar
+
+# Próximo passo para o DEPLOY
+1. Modificar os arquivos do projeto e realizar o commit normalmente para o github.
+2. Em alguns minutos sua atualização deverá ser atualizada no cloud run.
+
+## Observações
+1. Caso apresente algum erro no próprio Github apresenta
+2. No Cloud build também ficam os logs do docker
