@@ -44,46 +44,17 @@ def load_rag_chain():
 
         os.environ['MISTRAL_API_KEY'] = mistral_api_key
 
-        # 1. Carregar Modelo
+        # Carregar Modelo
         model = ChatMistralAI(
             model_name='mistral-large-latest',
             temperature=0,
             max_retries=2,
         )
 
-        # 2. Carregar Documentos
-        pdf_paths = ['lei_cdc.pdf', 'procon_lei.pdf', 'informacoes.pdf']  # Certifique-se que esses arquivos estão na mesma pasta
-        all_pdf_pages = []
-        for path in pdf_paths:
-            try:
-                loader = PyPDFLoader(path)
-
-                all_pdf_pages.extend(loader.load())
-            except Exception as e:
-                st.error(f"Erro ao carregar o PDF '{path}'. Verifique se o arquivo existe.")
-                return None
-
-        # 3. Dividir Documentos em Chunks
-        splitter_text = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=200,
-        )
-        chunks = splitter_text.split_documents(documents=all_pdf_pages)
-
-        if not chunks:
-            st.error("Nenhum texto foi extraído dos PDFs. Verifique os arquivos.")
-            return None
-
-        # 4. Criar Embeddings e Vector Store (ChromaDB)
+        # Criar Embeddings e Vector Store (ChromaDB)
         embedding_mistral = MistralAIEmbeddings()
         persist_directory = 'db'
-        #Trecho abaixo foi usado apenas para gerar o bd
-        # store_vetor = Chroma.from_documents(
-        #     documents=chunks,
-        #     embedding=embedding_mistral,
-        #     persist_directory=persist_directory,
-        #     collection_name='ProconVDC',  # Nome de coleção
-        # )
+        #Usa o banco ja criado para persistir os dados
         vector_store = Chroma(
             persist_directory=persist_directory,
             collection_name='ProconVDC',
